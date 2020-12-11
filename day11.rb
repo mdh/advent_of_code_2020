@@ -67,14 +67,49 @@ end
 
 seats = input.strip.lines.map(&:strip).map(&:chars)
 
-while true
-  new_seats = sit(seats)
-  new_seats = leave(new_seats)
-  if seats != new_seats
-    puts 'next round...'
-    seats = new_seats
-  else
-    puts seats.flatten.find_all { |s| s == Occupied }.size
-    break
+def run(seats)
+  while true
+    new_seats = sit(seats)
+    new_seats = leave(new_seats)
+    if seats != new_seats
+      puts 'next round...'
+      seats = new_seats
+    else
+      puts seats.flatten.find_all { |s| s == Occupied }.size
+      break
+    end
   end
 end
+
+run seats
+
+# part 2
+def adjacent(seats, x, y)
+  max_dist = [seats.size, seats.first.size].max
+  result = Hash.new { 0 }
+  directions = [-1, 0, 1].product([-1, 0, 1]).to_a - [[0, 0]]
+  directions.sort.each do |dx, dy|
+    for dist in 1..max_dist
+      new_x = x + dx*dist
+      new_y = y + dy*dist
+      next if (new_x < 0) || (new_y < 0)
+      row = seats[new_x] || []
+      seat = row[new_y]
+      result[seat] += 1
+      break if seat == Occupied || seat == EmptySeat
+    end
+  end
+  result
+end
+
+def leave(seats)
+  map_seats(seats) do |seat, x, y|
+    if seat == Occupied
+      adjacent(seats, x, y)[Occupied] >= 5 ? EmptySeat : Occupied
+    else
+      seat
+    end
+  end
+end
+
+run seats
