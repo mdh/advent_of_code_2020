@@ -22,15 +22,14 @@ Floor     = '.'
 
 def adjacent(seats, x, y)
   result = Hash.new { 0 }
-  for i in (x-1)..(x+1)
-    for j in (y-1)..(y+1)
-      next if i < 0 || j < 0
-      next if x == i && y == j
-      row = seats[i]
-      next if row.nil?
-      state = row[j]
-      result[state] += 1
-    end
+  directions = [-1, 0, 1].product([-1, 0, 1]).to_a - [[0,0]]
+  directions.sort.each do |dx, dy|
+    new_x = x + dx
+    new_y = y + dy
+    next if (new_x < 0) || (new_y < 0)
+    row = seats[new_x] || []
+    seat = row[new_y]
+    result[seat] += 1
   end
   result
 end
