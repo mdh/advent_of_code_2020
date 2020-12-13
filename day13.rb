@@ -26,16 +26,10 @@ wait_time = earliest_time - timestamp
 # part 2
 def run(test_input)
   pp bus_times = test_input.lines.last.split(',').map.with_index { |bus, offset| [bus.to_i, offset] }.reject { |bus, _| bus == 0 }
-  first_bus = bus_times.first
   bus_times.sort_by!(&:first).reverse
   (0..200_000_000_000_000_0).each do |t|
-    n = t * first_bus.first
-    pp n if n % 1_000_000 == 0
-    next if bus_times.any? { |bus, offset| (n + offset) % bus != 0 }
-    puts n
-    # 359050786332441954, too big
-    # 41847000000
-    # 12412000000
+    next if bus_times.any? { |bus, offset| (t + offset) % bus != 0 }
+    puts t
     break
   end
 end
