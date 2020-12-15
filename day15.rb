@@ -30,8 +30,8 @@ pp numbers.last
 numbers = input.split(',').map(&:to_i)
 occurrences = Hash.new { [] }
 numbers.each.with_index { |number, index| occurrences[number] = occurrences[number] << index }
-while numbers.size < 30_000_000 do
-  last_number = numbers.last
+last_number = numbers.last
+for turn in numbers.size..29_999_999
   new_number =
     if occurrences[last_number].size == 1
       0
@@ -39,8 +39,8 @@ while numbers.size < 30_000_000 do
       prev, last = occurrences[last_number][-2,2]
       last - prev
     end
-  occurrences[new_number] = occurrences[new_number] << numbers.size
-  numbers << new_number
+  occurrences[new_number] = occurrences[new_number] << turn
+  last_number = new_number
 end
-pp numbers.last
+pp last_number
 
