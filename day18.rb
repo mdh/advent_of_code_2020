@@ -1,10 +1,12 @@
 input = File.read('day18_input.txt')
 
 #1 + 2 * 3 + 4 * 5 + 6
-#1 + (2 * 3) + (4 * (5 + 6))
 #(3 * 6) * 2 * 5 * 4 + (5 * 7 * 3 * 2 + 4 * (7 * 8 * 8 + 5 + 3)) + 4
 #(9 + 7 + 3 * 9 * 7) + ((9 * 7 * 6 + 8) * 4 * 6 * 8)
 test_input = <<EOT
+1 + (2 * 3) + (4 * (5 + 6))
+2 * 3 + (4 * 5)
+5 + (8 * 3 + 9 + 3 * 4 * 3)
 5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))
 ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2
 EOT
@@ -59,3 +61,26 @@ totals = input.strip.each_line.map do |line|
 end
 
 puts totals.reduce :+
+
+# part 2
+Integer.class_eval do
+  alias_method :old_add, :+
+  alias_method :old_multiply, :*
+
+  def +(other)
+    old_multiply other
+  end
+
+  def *(other)
+    old_add other
+  end
+end
+
+totals = input.strip.each_line.map do |line|
+  new_line = line.gsub(/[+*]/) { |char| char == '+' ? '*' : '+' }
+  total = eval new_line
+  puts "#{line} becomes #{total}"
+  total
+end
+
+puts totals.reduce :old_add
