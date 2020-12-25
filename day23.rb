@@ -6,64 +6,68 @@ class Circle
   attr_reader :cups, :current
 
   def initialize(cups)
-    @cups = cups
-    @current = @cups.first
-  end
-
-  def position(cup)
-    @cups.find_index cup
+    @max_cup = cups.max
+    @current = cups.first
+    @cups = {}
+    cups.each.with_index { |cup, index| @cups[cup] = cups[(index + 1)] || cups[0] }
   end
 
   def pickup
-    3.times.map do
-      position = (position(@current) + 1) % @cups.size
-      next_cup = @cups.at(position)
-      @cups.delete next_cup
-    end
+    next_cup1 = @cups[@current]
+    next_cup2 = @cups[next_cup1]
+    next_cup3 = @cups[next_cup2]
+    [next_cup1, next_cup2, next_cup3]
   end
 
-  def select_destination
-    value = @current - 1
-    destination = nil
-    while true
-      if destination = @cups.bsearch { |cup| cup == value }
-        break
-      else
-        value -= 1
-        if value < 1
-          value = @cups.max
-        end
-      end
+  def select_destination(picked_up_cups)
+    destination = @current - 1
+    destination = @max_cup if destination < 1
+    while picked_up_cups.include? destination
+      destination -= 1
+      destination = @max_cup if destination < 1
     end
     destination
   end
 
-  def insert(destination, cups)
-    cups.each.with_index do |cup, index|
-      position = @cups.find_index { |cup| cup == destination }
-      @cups.insert(position + index, cup)
-    end
+  def insert(destination, picked_up_cups)
+    first_picked_up  = picked_up_cups.first
+    last_picked_up   = picked_up_cups.last
+
+    current_next     = @cups[last_picked_up]
+    destination_next = @cups[destination]
+
+    @cups[@current]       = current_next
+    @cups[last_picked_up] = destination_next
+    @cups[destination]    = first_picked_up
   end
 
   def select_current
-    position = position(@current) + 1
-    @current = @cups[position % @cups.size]
+    @current = @cups[@current]
   end
 
   def move
+    #pp @cups
     cups = pickup
-    destination = select_destination
+    #pp "Pick up #{cups}"
+    destination = select_destination(cups)
+    #pp "Destination: #{destination}"
     insert(destination, cups)
     select_current
   end
 end
 
-
-circle = Circle.new test_input.split(//).map &:to_i
-10.times { circle.move }
-pp circle.cups, circle.current
-
-circle = Circle.new input.split(//).map &:to_i
+circle = Circle.new input.strip.split(//).map &:to_i
 100.times { circle.move }
-pp circle.cups, circle.current
+pp circle
+
+ #part 2
+input2 = input.split(//).map &:to_i
+input2 += (10..1_000_000).to_a
+circle = Circle.new input2
+(input2.max * 10).times.with_index do |index|
+  circle.move
+end
+#pp pos = circle.position(1)
+pos = 1
+pp 2.times.map { pos = circle.cups[pos] }.reduce(:*)
 
